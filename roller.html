@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>转盘</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial Rounded MT Bold', 'Arial', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #d08cdd, #8f808f);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .container {
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 15px;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(to right, #ff9a00, #ff3d77);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            color: #d0e1ff;
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.4;
+        }
+        
+        .main-content {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            align-items: stretch;
+            width: 100%;
+        }
+        
+        /* 转盘区域 - 加大面积占比 */
+        .wheel-section {
+            flex: 2;
+            min-width: 600px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .wheel-container {
+            position: relative;
+            width: 500px;
+            height: 500px;
+            margin-bottom: 20px;
+        }
+        
+        .wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+            border: 10px solid #2c3e50;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.5), 
+                        inset 0 0 30px rgba(0, 0, 0, 0.3);
+            transition: transform 1.5s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+        }
+        
+        .pointer {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 70px;
+            z-index: 10;
+        }
+        
+        .pointer:before {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 25px solid transparent;
+            border-right: 25px solid transparent;
+            border-top: 50px solid #e74c3c;
+            filter: drop-shadow(0 5px 8px rgba(0, 0, 0, 0.4));
+        }
+        
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+            width: 100%;
+            max-width: 500px;
+            justify-content: center;
+        }
+        
+        .spin-btn, .random-area-btn {
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .spin-btn {
+            background: linear-gradient(to right, #ff416c, #ff4b2b);
+        }
+        
+        .spin-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 65, 108, 0.6);
+        }
+        
+        .random-area-btn {
+            background: linear-gradient(to right, #9b59b6, #8e44ad);
+        }
+        
+        .random-area-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(155, 89, 182, 0.6);
+        }
+        
+        .spin-btn:active, .random-area-btn:active {
+            transform: translateY(1px);
+        }
+        
+        .spin-btn:disabled {
+            background: linear-gradient(to right, #aaa, #888);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .result {
+            font-size: 1.8rem;
+            margin-top: 25px;
+            min-height: 50px;
+            text-align: center;
+            padding: 15px 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            width: 100%;
+            max-width: 500px;
+        }
+        
+        .result-text {
+            color: #ffeb3b;
+            font-weight: bold;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+        }
+        
+        /* 名单管理区域 - 缩小面积占比 */
+        .management-section {
+            flex: 1;
+            min-width: 350px;
+            max-width: 450px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .section-title {
+            font-size: 1.6rem;
+            margin-bottom: 15px;
+            color: #ffcc00;
+            text-align: center;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(255, 204, 0, 0.3);
+        }
+        
+        .input-group {
+            display: flex;
+            margin-bottom: 15px;
+        }
+        
+        .name-input {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 10px 0 0 10px;
+            font-size: 1rem;
+            background: rgba(255, 255, 255, 0.9);
+        }
+        
+        .add-btn, .delete-btn {
+            padding: 12px 20px;
+            background: linear-gradient(to right, #3498db, #2980b9);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        
+        .add-btn {
+            border-radius: 0 10px 10px 0;
+        }
+        
+        .delete-btn {
+            background: linear-gradient(to right, #e74c3c, #c0392b);
+            border-radius: 10px;
+            margin-top: 10px;
+            width: 100%;
+        }
+        
+        .add-btn:hover {
+            background: linear-gradient(to right, #2980b9, #1c6ea4);
+        }
+        
+        .delete-btn:hover {
+            background: linear-gradient(to right, #c0392b, #a93226);
+        }
+        
+        .name-list {
+            flex: 1;
+            max-height: 250px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+        }
+        
+        .name-list h3 {
+            margin-bottom: 10px;
+            color: #a5d6ff;
+            font-size: 1.1rem;
+        }
+        
+        .names-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .name-tag {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            display: inline-block;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+        }
+        
+        .name-tag.selected {
+            background: rgba(255, 204, 0, 0.5);
+            border: 2px solid #ffcc00;
+        }
+        
+        .name-percentage {
+            font-size: 0.7rem;
+            color: #a5d6ff;
+            margin-left: 5px;
+        }
+        
+        .preset-lists {
+            margin-top: 20px;
+        }
+        
+        .preset-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .preset-btn {
+            flex: 1;
+            padding: 12px;
+            background: linear-gradient(to right, #2ecc71, #27ae60);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            min-width: 100px;
+        }
+        
+        .preset-btn:hover {
+            background: linear-gradient(to right, #27ae60, #219653);
+            transform: translateY(-2px);
+        }
+        
+        .stats {
+            margin-top: 15px;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            text-align: center;
+            font-size: 1rem;
+        }
+        
+        .instructions {
+            margin-top: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            max-width: 1000px;
+            width: 100%;
+        }
+        
+        .instructions h2 {
+            color: #ffcc00;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 1.5rem;
+        }
+        
+        .instructions ol {
+            padding-left: 25px;
+            line-height: 1.6;
+            columns: 2;
+            column-gap: 40px;
+        }
+        
+        .instructions li {
+            margin-bottom: 10px;
+            break-inside: avoid;
+        }
+        
+        /* iPad横版适配 */
+        @media (max-width: 1200px) {
+            .main-content {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .wheel-section, .management-section {
+                min-width: 100%;
+                max-width: 800px;
+            }
+            
+            .management-section {
+                max-width: 600px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .wheel-container {
+                width: 400px;
+                height: 400px;
+            }
+            
+            .controls {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .spin-btn, .random-area-btn {
+                width: 100%;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .instructions ol {
+                columns: 1;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .wheel-container {
+                width: 320px;
+                height: 320px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+        }
+        
+        /* 横版优化 */
+        @media (min-width: 768px) and (max-width: 1024px) and (orientation: landscape) {
+            .main-content {
+                flex-direction: row;
+            }
+            
+            .wheel-section {
+                min-width: 500px;
+            }
+            
+            .management-section {
+                min-width: 300px;
+                max-width: 350px;
+            }
+            
+            .wheel-container {
+                width: 450px;
+                height: 450px;
+            }
+            
+            .instructions ol {
+                columns: 2;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+           
+        </header>
+        
+        <div class="main-content">
+            <section class="wheel-section">
+                <div class="wheel-container">
+                    <div class="pointer"></div>
+                    <canvas id="wheelCanvas" class="wheel" width="500" height="500"></canvas>
+                </div>
+                
+                <div class="controls">
+                    <button id="spinBtn" class="spin-btn">开始旋转</button>
+                    <button id="randomAreaBtn" class="random-area-btn">随机面积占比</button>
+                </div>
+                
+                <div class="result">
+                    <p>抽奖结果: <span id="resultText" class="result-text">等待抽奖...</span></p>
+                </div>
+            </section>
+            
+            <section class="management-section">
+                <h2 class="section-title">名单管理</h2>
+                
+                <div class="input-group">
+                    <input type="text" id="nameInput" class="name-input" placeholder="输入参与者姓名">
+                    <button id="addBtn" class="add-btn">添加</button>
+                </div>
+                
+                <button id="deleteBtn" class="delete-btn">删除选中的姓名</button>
+                
+                <div class="name-list">
+                    <h3>当前参与者 (<span id="nameCount">0</span> 人):</h3>
+                    <div id="namesContainer" class="names-container">
+                        <!-- 姓名标签会动态添加到这里 -->
+                    </div>
+                </div>
+                
+                <div class="stats">
+                    <p>当前模式: <span id="areaMode">平均分配</span></p>
+                    <p>最小占比: <span id="minPercentage">0</span>% | 最大占比: <span id="maxPercentage">0</span>%</p>
+                </div>
+                
+                <div class="preset-lists">
+                    <h3 class="section-title">预设名单</h3>
+                    <div class="preset-buttons">
+                        <button id="preset1" class="preset-btn">1.5</button>
+                        <button id="preset2" class="preset-btn">27.2</button>
+                        <button id="preset3" class="preset-btn">27.3</button>
+                    </div>
+                </div>
+            </section>
+        </div>
+        
+        <div class="instructions">
+            <h2>使用说明</h2>
+            <ol>
+                <li>在输入框中添加参与者姓名，可以添加重复姓名</li>
+                <li>每个姓名在转盘上占据相等的面积，删除姓名后会重新平均分配</li>
+                <li>点击"随机面积占比"按钮，会随机分配每个名字的面积占比（5%-30%）</li>
+                <li>添加新名字或删除某个名字后，所有的名字面积会回归平均值</li>
+                <li>可以点击预设名单按钮快速添加一组姓名</li>
+                <li>点击"开始旋转"按钮开始抽奖，1.5秒后停止并显示结果</li>
+                <li>点击姓名标签可以选中/取消选中，然后可以删除选中的姓名</li>
+                <li>所有名字在转盘上都是水平显示，方便阅读</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        // 转盘和绘图相关变量
+        const canvas = document.getElementById('wheelCanvas');
+        const ctx = canvas.getContext('2d');
+        const spinBtn = document.getElementById('spinBtn');
+        const resultText = document.getElementById('resultText');
+        const nameInput = document.getElementById('nameInput');
+        const addBtn = document.getElementById('addBtn');
+        const deleteBtn = document.getElementById('deleteBtn');
+        const randomAreaBtn = document.getElementById('randomAreaBtn');
+        const namesContainer = document.getElementById('namesContainer');
+        const nameCount = document.getElementById('nameCount');
+        const areaMode = document.getElementById('areaMode');
+        const minPercentage = document.getElementById('minPercentage');
+        const maxPercentage = document.getElementById('maxPercentage');
+        
+        // 预设名单按钮
+        const preset1Btn = document.getElementById('preset1');
+        const preset2Btn = document.getElementById('preset2');
+        const preset3Btn = document.getElementById('preset3');
+        
+        // 转盘状态
+        let isSpinning = false;
+        let rotationAngle = 0;
+        let names = []; // 每个元素为 {name: "姓名", weight: 权重比例}
+        let selectedNames = new Set();
+        let currentAnimationId = null;
+        let isRandomAreaMode = false; // 是否处于随机面积模式
+        
+        // 颜色数组
+        const colors = [
+            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', 
+            '#9966FF', '#FF9F40', '#8AC926', '#1982C4',
+            '#6A4C93', '#FF595E', '#FFCA3A', '#8AC926'
+        ];
+        
+        // 初始化
+        function init() {
+            // 添加示例姓名
+            addName("张三");
+            addName("李四");
+            addName("王五");
+            addName("赵六");
+            addName("钱七");
+            
+            // 绘制初始转盘
+            drawWheel();
+            
+            // 绑定事件
+            spinBtn.addEventListener('click', spinWheel);
+            addBtn.addEventListener('click', addNameFromInput);
+            deleteBtn.addEventListener('click', deleteSelectedNames);
+            randomAreaBtn.addEventListener('click', randomizeWeights);
+            nameInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    addNameFromInput();
+                }
+            });
+            
+            // 预设名单事件
+            preset1Btn.addEventListener('click', () => loadPreset(1));
+            preset2Btn.addEventListener('click', () => loadPreset(2));
+            preset3Btn.addEventListener('click', () => loadPreset(3));
+            
+            updateStats();
+        }
+        
+        // 从输入框添加姓名
+        function addNameFromInput() {
+            const name = nameInput.value.trim();
+            if (name) {
+                addName(name);
+                nameInput.value = '';
+                nameInput.focus();
+            }
+        }
+        
+        // 添加姓名到列表
+        function addName(name) {
+            // 退出随机面积模式，回归平均分配
+            isRandomAreaMode = false;
+            
+            // 随机插入位置
+            const randomIndex = Math.floor(Math.random() * (names.length + 1));
+            
+            // 计算平均权重
+            const avgWeight = 1 / (names.length + 1);
+            
+            // 调整现有名字的权重
+            names.forEach(item => {
+                item.weight = avgWeight;
+            });
+            
+            // 添加新名字
+            names.splice(randomIndex, 0, {name: name, weight: avgWeight});
+            
+            // 更新显示
+            updateNamesDisplay();
+            drawWheel();
+            updateStats();
+        }
+        
+        // 更新姓名显示
+        function updateNamesDisplay() {
+            namesContainer.innerHTML = '';
+            
+            names.forEach((item, index) => {
+                const nameElement = document.createElement('div');
+                nameElement.className = 'name-tag';
+                if (selectedNames.has(index)) {
+                    nameElement.classList.add('selected');
+                }
+                
+                nameElement.innerHTML = `
+                    ${item.name} <span class="name-percentage">(${(item.weight * 100).toFixed(1)}%)</span>
+                `;
+                
+                nameElement.dataset.index = index;
+                
+                // 点击选中/取消选中
+                nameElement.addEventListener('click', () => {
+                    const index = parseInt(nameElement.dataset.index);
+                    
+                    if (selectedNames.has(index)) {
+                        selectedNames.delete(index);
+                        nameElement.classList.remove('selected');
+                    } else {
+                        selectedNames.add(index);
+                        nameElement.classList.add('selected');
+                    }
+                });
+                
+                namesContainer.appendChild(nameElement);
+            });
+            
+            nameCount.textContent = names.length;
+        }
+        
+        // 删除选中的姓名
+        function deleteSelectedNames() {
+            if (selectedNames.size === 0) return;
+            
+            // 退出随机面积模式，回归平均分配
+            isRandomAreaMode = false;
+            
+            // 从大到小删除索引，避免删除后索引变化
+            const sortedIndices = Array.from(selectedNames).sort((a, b) => b - a);
+            
+            sortedIndices.forEach(index => {
+                names.splice(index, 1);
+            });
+            
+            // 重新计算平均权重
+            const avgWeight = names.length > 0 ? 1 / names.length : 0;
+            names.forEach(item => {
+                item.weight = avgWeight;
+            });
+            
+            // 清空选中
+            selectedNames.clear();
+            
+            // 更新显示
+            updateNamesDisplay();
+            drawWheel();
+            updateStats();
+            
+            // 清空结果
+            resultText.textContent = "等待抽奖...";
+        }
+        
+        // 随机化权重
+        function randomizeWeights() {
+            if (names.length === 0) return;
+            
+            isRandomAreaMode = true;
+            
+            // 设置最小和最大权重
+            const minWeight = 0.03; // 5%
+            const maxWeight = 0.40; // 30%
+            
+            // 生成随机权重
+            let totalWeight = 0;
+            const randomWeights = [];
+            
+            // 第一轮：为每个名字生成随机权重
+            for (let i = 0; i < names.length; i++) {
+                const randomWeight = minWeight + Math.random() * (maxWeight - minWeight);
+                randomWeights.push(randomWeight);
+                totalWeight += randomWeight;
+            }
+            
+            // 第二轮：调整权重使总和为1
+            const scale = 1 / totalWeight;
+            for (let i = 0; i < names.length; i++) {
+                let adjustedWeight = randomWeights[i] * scale;
+                
+                // 确保调整后的权重仍在范围内
+                if (adjustedWeight < minWeight) {
+                    adjustedWeight = minWeight;
+                } else if (adjustedWeight > maxWeight) {
+                    adjustedWeight = maxWeight;
+                }
+                
+                names[i].weight = adjustedWeight;
+            }
+            
+            // 第三轮：微调确保总和为1
+            let finalTotal = names.reduce((sum, item) => sum + item.weight, 0);
+            if (Math.abs(finalTotal - 1) > 0.0001) {
+                const adjustment = (1 - finalTotal) / names.length;
+                names.forEach(item => {
+                    item.weight += adjustment;
+                    
+                    // 确保调整后仍在范围内
+                    if (item.weight < minWeight) item.weight = minWeight;
+                    if (item.weight > maxWeight) item.weight = maxWeight;
+                });
+            }
+            
+            // 更新显示
+            updateNamesDisplay();
+            drawWheel();
+            updateStats();
+        }
+        
+        // 更新统计数据
+        function updateStats() {
+            const count = names.length;
+            
+            if (count === 0) {
+                areaMode.textContent = "平均分配";
+                minPercentage.textContent = "0";
+                maxPercentage.textContent = "0";
+                return;
+            }
+            
+            // 计算最小和最大权重
+            let minWeight = 1, maxWeight = 0;
+            names.forEach(item => {
+                if (item.weight < minWeight) minWeight = item.weight;
+                if (item.weight > maxWeight) maxWeight = item.weight;
+            });
+            
+            areaMode.textContent = isRandomAreaMode ? "随机分配" : "平均分配";
+            minPercentage.textContent = (minWeight * 100).toFixed(1);
+            maxPercentage.textContent = (maxWeight * 100).toFixed(1);
+        }
+        
+        // 绘制转盘 - 修改文字方向为水平
+        function drawWheel() {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = Math.min(centerX, centerY) - 15;
+            
+            // 清空画布
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            if (names.length === 0) {
+                // 如果没有姓名，绘制空转盘
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+                ctx.fillStyle = '#f0f0f0';
+                ctx.fill();
+                ctx.strokeStyle = '#2c3e50';
+                ctx.lineWidth = 8;
+                ctx.stroke();
+                
+                // 添加文字
+                ctx.fillStyle = '#666';
+                ctx.font = 'bold 28px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('请添加参与者', centerX, centerY);
+                return;
+            }
+            
+            // 计算累计角度
+            let currentAngle = rotationAngle;
+            
+            // 绘制每个扇形
+            for (let i = 0; i < names.length; i++) {
+                const item = names[i];
+                const angleSize = item.weight * 2 * Math.PI;
+                const startAngle = currentAngle;
+                const endAngle = startAngle + angleSize;
+                
+                // 绘制扇形
+                ctx.beginPath();
+                ctx.moveTo(centerX, centerY);
+                ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+                ctx.closePath();
+                
+                // 使用循环颜色
+                const colorIndex = i % colors.length;
+                ctx.fillStyle = colors[colorIndex];
+                ctx.fill();
+                
+                // 扇形边框
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                
+                // 计算扇形中心点的坐标（用于绘制水平文字）
+                const midAngle = startAngle + angleSize / 2;
+                const textRadius = radius * 0.6; // 文字离中心的距离
+                const textX = centerX + Math.cos(midAngle) * textRadius;
+                const textY = centerY + Math.sin(midAngle) * textRadius;
+                
+                // 绘制姓名文本（水平显示）
+                ctx.save();
+                ctx.translate(textX, textY);
+                
+                // 调整文字大小基于扇形大小
+                let fontSize = Math.min(20, Math.max(12, angleSize * 25));
+                ctx.font = `bold ${fontSize}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillStyle = '#fff';
+                
+                // 截断过长的姓名
+                let displayName = item.name;
+                if (displayName.length > 6) {
+                    displayName = displayName.substring(0, 5) + '...';
+                }
+                
+                // 绘制名字（水平方向）
+                ctx.fillText(displayName, 0, 0);
+                
+                // 如果扇形足够大，绘制百分比
+                if (angleSize > 0.3) {
+                    const percentText = `${(item.weight * 100).toFixed(1)}%`;
+                    ctx.font = `bold ${fontSize - 4}px Arial`;
+                    ctx.fillText(percentText, 0, fontSize);
+                }
+                
+                ctx.restore();
+                
+                currentAngle = endAngle;
+            }
+            
+            // 绘制中心圆
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 25, 0, Math.PI * 2);
+            ctx.fillStyle = '#2c3e50';
+            ctx.fill();
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 5;
+            ctx.stroke();
+        }
+        
+        // 旋转转盘
+        function spinWheel() {
+            if (isSpinning || names.length === 0) return;
+            
+            isSpinning = true;
+            spinBtn.disabled = true;
+            randomAreaBtn.disabled = true;
+            resultText.textContent = "抽奖中...";
+            
+            // 随机决定旋转圈数和最终角度
+            const spins = 5 + Math.random() * 3; // 5-8圈
+            const totalRotation = spins * 2 * Math.PI;
+            
+            // 随机决定一个额外的旋转角度（这将决定最终结果）
+            const extraRotation = Math.random() * 2 * Math.PI;
+            
+            // 最终的总旋转角度
+            const finalRotation = totalRotation + extraRotation;
+            
+            // 动画开始时间
+            const startTime = Date.now();
+            const duration = 1500; // 1.5秒
+            
+            // 动画函数
+            function animate() {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                // 使用缓动函数使旋转更自然（先快后慢）
+                const easeOut = 1 - Math.pow(1 - progress, 3);
+                
+                // 更新旋转角度
+                rotationAngle = easeOut * finalRotation;
+                
+                // 重绘转盘
+                drawWheel();
+                
+                if (progress < 1) {
+                    currentAnimationId = requestAnimationFrame(animate);
+                } else {
+                    // 动画结束
+                    isSpinning = false;
+                    spinBtn.disabled = false;
+                    randomAreaBtn.disabled = false;
+                    
+                    // 标准化旋转角度到0-2π之间
+                    rotationAngle = rotationAngle % (2 * Math.PI);
+                    
+                    // 计算指针指向的扇形（修正指针指向）
+                    // 指针指向12点钟方向，对应的角度是-π/2
+                    // 但我们转盘的0度是从3点钟方向开始，所以需要调整
+                    const pointerAngle = -Math.PI / 2; // 12点钟方向是-π/2弧度
+                    
+                    // 计算相对于转盘0度的角度
+                    let adjustedAngle = pointerAngle - rotationAngle;
+                    
+                    // 确保角度在0-2π范围内
+                    while (adjustedAngle < 0) adjustedAngle += 2 * Math.PI;
+                    while (adjustedAngle >= 2 * Math.PI) adjustedAngle -= 2 * Math.PI;
+                    
+                    // 计算对应的扇形索引（考虑权重）
+                    let cumulativeAngle = 0;
+                    let winnerIndex = -1;
+                    
+                    for (let i = 0; i < names.length; i++) {
+                        const item = names[i];
+                        const angleSize = item.weight * 2 * Math.PI;
+                        
+                        if (adjustedAngle >= cumulativeAngle && adjustedAngle < cumulativeAngle + angleSize) {
+                            winnerIndex = i;
+                            break;
+                        }
+                        
+                        cumulativeAngle += angleSize;
+                    }
+                    
+                    // 如果没找到（可能是浮点数精度问题），选择最后一个
+                    if (winnerIndex === -1) {
+                        winnerIndex = names.length - 1;
+                    }
+                    
+                    // 显示结果
+                    resultText.textContent = names[winnerIndex].name;
+                    
+                    // 高亮显示结果扇形
+                    highlightResult(winnerIndex);
+                }
+            }
+            
+            // 开始动画
+            currentAnimationId = requestAnimationFrame(animate);
+        }
+        
+        // 高亮显示结果扇形
+        function highlightResult(winnerIndex) {
+            // 绘制一个高亮的外圈
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = Math.min(centerX, centerY) - 15;
+            
+            // 找到获胜扇形的角度范围
+            let cumulativeAngle = 0;
+            let startAngle = 0;
+            let angleSize = 0;
+            
+            for (let i = 0; i < names.length; i++) {
+                const item = names[i];
+                angleSize = item.weight * 2 * Math.PI;
+                
+                if (i === winnerIndex) {
+                    startAngle = cumulativeAngle + rotationAngle;
+                    break;
+                }
+                
+                cumulativeAngle += angleSize;
+            }
+            
+            const endAngle = startAngle + angleSize;
+            
+            // 绘制高亮外圈
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius + 15, startAngle, endAngle);
+            ctx.arc(centerX, centerY, radius, endAngle, startAngle, true);
+            ctx.closePath();
+            
+            // 创建高亮渐变
+            const gradient = ctx.createRadialGradient(
+                centerX, centerY, radius,
+                centerX, centerY, radius + 15
+            );
+            gradient.addColorStop(0, 'rgba(255, 255, 255, 0)');
+            gradient.addColorStop(1, 'rgba(255, 215, 0, 0.7)');
+            
+            ctx.fillStyle = gradient;
+            ctx.fill();
+            
+            // 3秒后移除高亮
+            setTimeout(() => {
+                if (!isSpinning) {
+                    drawWheel();
+                }
+            }, 3000);
+        }
+        
+        // 加载预设名单
+        function loadPreset(presetNumber) {
+            let presetNames = [];
+            
+            switch(presetNumber) {
+                case 1:
+                    // 团队A - 开发团队
+                    presetNames = ["魏睿", "程思涵", "王洛涵", "董芮绮", "韩兮桐", "黄子轩", "乔琪雅", "吴承佑", "郑清雅"];
+                    break;
+                case 2:
+                    // 团队B - 设计团队
+                    presetNames = ["小明", "小红", "小刚", "小丽", "小华", "小芳", "小强", "小美"];
+                    break;
+                case 3:
+                    // 团队C - 营销团队
+                    presetNames = ["刘一", "陈二", "张三", "李四", "王五", "赵六", "孙七", "周八"];
+                    break;
+            }
+            
+            // 清空当前名单
+            names = [];
+            selectedNames.clear();
+            
+            // 退出随机面积模式
+            isRandomAreaMode = false;
+            
+            // 添加预设名单
+            presetNames.forEach(name => {
+                names.push({name: name, weight: 1 / presetNames.length});
+            });
+            
+            // 更新显示
+            updateNamesDisplay();
+            drawWheel();
+            updateStats();
+            resultText.textContent = "等待抽奖...";
+        }
+        
+        // 页面加载完成后初始化
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
