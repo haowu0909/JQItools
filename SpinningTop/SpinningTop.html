@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Fxxking JQI</title>
+    <title>抽陀螺小游戏 - 鞭子版</title>
     <style>
         body {
             margin: 0;
@@ -16,6 +16,7 @@
             background-color: #87CEEB; /* 天空蓝背景 */
             font-family: Arial, sans-serif;
             overflow: hidden; /* 防止出现滚动条 */
+            padding-bottom: 100px; /* 为固定底部按钮预留空间，防止内容被遮挡 */
         }
 
         /* 游戏标题 */
@@ -148,6 +149,20 @@
             padding: 15px;
             box-sizing: border-box;
             background-color: #2C3E50; /* 深色背景 */
+            position: fixed; /* 固定到底部 */
+            left: 0;
+            bottom: 0;
+            z-index: 999; /* 确保在最上层 */
+            padding-bottom: env(safe-area-inset-bottom); /* 动态调整底部安全区域 */
+            /* 为不支持 env() 的浏览器提供一个默认值 */
+            padding-bottom: 20px; /* 可根据需要调整 */
+        }
+
+        /* 针对不支持env()函数的老版本浏览器，可以使用固定的底部填充 */
+        @supports not (padding-bottom: env(safe-area-inset-bottom)) {
+            .control-area {
+                padding-bottom: 20px; /* 根据实际需要调整 */
+            }
         }
 
         /* 进度条容器 */
@@ -250,7 +265,7 @@
 <body>
 
     <div class="header">
-        <h1>Let's Fxxk JQI</h1>
+        <h1>抽陀螺！</h1>
     </div>
 
     <div class="game-area">
