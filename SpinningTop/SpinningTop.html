@@ -33,7 +33,7 @@
 
         /* 中间游戏区域 - 小人和陀螺 */
         .game-area {
-            /* 修改：计算可用高度，并向上移动约陀螺半径 (90px) */
+            /* 修改：计算可用高度 */
             height: calc(100vh - 100px - 100px - 20px); /* 视口高度 - 按钮区域高度(约) - 标题区域高度(约) - 一些余量 */
             min-height: 200px; /* 设置一个最小高度，防止空间过小 */
             display: flex;
@@ -44,7 +44,8 @@
             width: 100%; /* 确保占满宽度 */
             padding: 10px 0; /* 添加一点内边距 */
             box-sizing: border-box;
-            margin-bottom: -90px; /* 向上移动约陀螺半径的距离 (180px / 2 = 90px) */
+            /* 修改：使用 transform 向上移动约陀螺半径 (90px) */
+            transform: translateY(-90px);
         }
 
         /* 小人容器 - 使用 flex 布局，高度自适应 */
@@ -270,7 +271,7 @@
 <body>
 
     <div class="header">
-        <h1>JQI wcnm><h1>
+        <h1> JQI wcnm </h1>
     </div>
 
     <div class="game-area">
